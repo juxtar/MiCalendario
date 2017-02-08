@@ -1,0 +1,50 @@
+{
+  "project_info": {
+    "project_number": "716209873850",
+    "firebase_url": "https://micalendario-731ab.firebaseio.com",
+    "project_id": "micalendario-731ab",
+    "storage_bucket": "micalendario-731ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716209873850:android:d5e8ed99ada08c96",
+        "android_client_info": {
+          "package_name": "de.kevoundfreun.micalendario"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716209873850-26gekg33s7mb1pnso2rmeqauce169lrm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3Hc0gKxEQLxbWms2mcTEENGK68jKxaXE"
+        },
+        {
+          "current_key": "AIzaSyD8cw5m9aV8unZ9caooWrk6JvbTuKfb6Rc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716209873850-26gekg33s7mb1pnso2rmeqauce169lrm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
