@@ -24,4 +24,7 @@
 
     <string name="action_register">Registrarse</string>
     <string name="title_activity_register">Registrarse</string>
+
+    <string name="aceptar">Aceptar</string>
+    <string name="cancelar">Cancelar</string>
 </resources>
