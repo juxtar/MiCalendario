@@ -1,5 +1,9 @@
 package de.kevoundfreun.micalendario.clases;
 
+import android.widget.ArrayAdapter;
+
+import com.alamkanak.weekview.WeekViewEvent;
+
 import java.util.ArrayList;
 
 /**
@@ -35,5 +39,15 @@ public class Actividad {
 
     public void setHorarios(ArrayList<Horario> horarios) {
         this.horarios = horarios;
+    }
+
+    public ArrayList<WeekViewEvent> toWeekViewEvents(){
+        ArrayList<WeekViewEvent> listaEventos = new ArrayList<>();
+
+        for(Horario h : horarios){
+            listaEventos.addAll(h.toWeekViewEvents());
+        }
+
+        return listaEventos;
     }
 }
