@@ -2,6 +2,7 @@
     <string name="app_name">Mi Calendario</string>
     <string name="action_settings">Settings</string>
     <string name="action_logout">Desconectarse</string>
+    <string name="action_save">Guardar</string>
     <string name="title_activity_login">Mi Calendario</string>
 
     <!-- Strings related to login -->
@@ -27,4 +28,8 @@
 
     <string name="aceptar">Aceptar</string>
     <string name="cancelar">Cancelar</string>
+    <string name="success_actividad">¡Actividad creada con éxito!</string>
+
+    <string name="exit_dialog">¿Está seguro que desea salir?</string>
+    <string name="exit_confirm">Salir</string>
 </resources>

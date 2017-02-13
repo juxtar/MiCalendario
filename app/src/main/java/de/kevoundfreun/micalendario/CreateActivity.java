@@ -2,20 +2,26 @@ package de.kevoundfreun.micalendario;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
-import android.widget.Spinner;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 
@@ -23,10 +29,10 @@ import de.kevoundfreun.micalendario.clases.Actividad;
 import de.kevoundfreun.micalendario.clases.Horario;
 
 public class CreateActivity extends AppCompatActivity {
+    private DatabaseReference mDatabase;
+    private FirebaseAuth mAuth;
 
     View dialogView;
-    String[] horas = new String[24];
-    String[] minutos = new String[60];
     NumberPicker np_hs_ini;
     NumberPicker np_min_ini;
     NumberPicker np_hs_fin;
@@ -35,17 +41,12 @@ public class CreateActivity extends AppCompatActivity {
 
     Actividad actividad = new Actividad();
 
-
-    private void cargarSpinner(String[] listaHoras, int cantidad){
-        for(int i=0; i<cantidad; i++){
-            listaHoras[i]=String.valueOf(i);
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_create);
+        setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_horario);
         ListView listaHorarios = (ListView) findViewById(R.id.lv_lista_horarios);
@@ -63,7 +64,13 @@ public class CreateActivity extends AppCompatActivity {
 
         listaHorarios.setAdapter(adapter);
 
+        // Database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        // Auth
+        mAuth = FirebaseAuth.getInstance();
     }
+
     private void cargarDialog(){
 
         np_hs_ini = (NumberPicker) dialogView.findViewById(R.id.np_hs_inicio);
@@ -98,10 +105,7 @@ public class CreateActivity extends AppCompatActivity {
 
 
     private Dialog createDialog(){
-        AlertDialog.Builder builder;
-
-
-        builder = new AlertDialog.Builder(CreateActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
         // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
 
@@ -153,13 +157,13 @@ public class CreateActivity extends AppCompatActivity {
 
     private void cargarDias(ArrayList<Integer> dias){
         ArrayList<CheckBox> ch_dias = new ArrayList<CheckBox>();
+        ch_dias.add((CheckBox) dialogView.findViewById(R.id.domingo));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.lunes));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.martes));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.miercoles));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.jueves));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.viernes));
         ch_dias.add((CheckBox) dialogView.findViewById(R.id.sabado));
-        ch_dias.add((CheckBox) dialogView.findViewById(R.id.domingo));
         for(int i=0; i<7;i++){
             if(ch_dias.get(i).isChecked()){
                 dias.add(Integer.valueOf(i));
@@ -167,6 +171,42 @@ public class CreateActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_create, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_save) {
+            FirebaseUser usuario = mAuth.getCurrentUser();
+            if (usuario != null) {
+                agregarActividad(usuario.getUid());
+                Snackbar snackbar = Snackbar
+                        .make(findViewById(R.id.activity_create),
+                                getString(R.string.success_actividad), Snackbar.LENGTH_LONG);
+
+                snackbar.show();
+                finish();
+            }
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void agregarActividad(String uid) {
+        EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
+        actividad.setNombre(nombreActividad.getText().toString());
+        mDatabase.child("users").child(uid).child("actividades").push()
+                .setValue(actividad);
+    }
 }

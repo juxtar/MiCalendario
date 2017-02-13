@@ -38,25 +38,25 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
 
         for(Integer dia : horario.getDias()){
             switch (dia){
-                case 0:
+                case 1:
                     dias = dias + "Lu. ";
                     break;
-                case 1:
+                case 2:
                     dias = dias + "Ma. ";
                     break;
-                case 2:
+                case 3:
                     dias = dias + "Mi. ";
                     break;
-                case 3:
+                case 4:
                     dias = dias + "Ju. ";
                     break;
-                case 4:
+                case 5:
                     dias = dias + "Vi. ";
                     break;
-                case 5:
+                case 6:
                     dias = dias + "Sa. ";
                     break;
-                case 6:
+                case 0:
                     dias = dias + "Do.";
                     break;
             }

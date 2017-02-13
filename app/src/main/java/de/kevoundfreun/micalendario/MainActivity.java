@@ -1,11 +1,13 @@
 package de.kevoundfreun.micalendario;
 
 import android.app.usage.UsageEvents;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -93,5 +95,26 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     @Override
     public void onEventLongPress(WeekViewEvent event, RectF eventRect) {
 
+    }
+
+    @Override
+    public void onBackPressed(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage(R.string.exit_dialog)
+                .setPositiveButton(R.string.exit_confirm, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_HOME);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton(R.string.cancelar, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        // Create the AlertDialog object and return it
+        builder.create().show();
     }
 }
