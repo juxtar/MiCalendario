@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,12 +19,26 @@ import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import de.kevoundfreun.micalendario.clases.Actividad;
 
 public class MainActivity extends AppCompatActivity implements WeekView.EventLongPressListener, WeekView.EventClickListener, MonthLoader.MonthChangeListener {
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
+
+    ArrayList<Actividad> actividades = new ArrayList<>();
+    ArrayList<WeekViewEvent> weekViewEvents = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +55,46 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 startActivity(intent);
             }
         });
+
+        //Auth
+        mAuth = FirebaseAuth.getInstance();
+
+        //Acceso Database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        FirebaseUser usuario = mAuth.getCurrentUser();
+        if(usuario != null){
+            Query query = mDatabase.child("users").child(usuario.getUid()).child("actividades");
+            query.orderByKey().addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Actividad actividad = Actividad.fromHashMap((HashMap<String, Object>) dataSnapshot.getValue());
+                    weekViewEvents.addAll(actividad.toWeekViewEvents());
+                    actividades.add(actividad);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+
 
         // Get a reference for the week view in the layout.
         WeekView mWeekView = (WeekView) findViewById(R.id.weekView);
@@ -84,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
     @Override
     public List<? extends WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-        return new ArrayList<>();
+        return weekViewEvents;
     }
 
     @Override

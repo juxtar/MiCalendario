@@ -5,6 +5,7 @@ import android.widget.ArrayAdapter;
 import com.alamkanak.weekview.WeekViewEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by ke on 12/2/2017.
@@ -21,8 +22,7 @@ public class Actividad {
     }
 
     public Actividad() {
-        this.horarios = new ArrayList<Horario>();
-
+        this.horarios = new ArrayList<>();
     }
 
     public String getNombre() {
@@ -49,5 +49,38 @@ public class Actividad {
         }
 
         return listaEventos;
+    }
+
+    public static Actividad fromHashMap(HashMap<String, Object> hashMap) {
+        // Firebase guarda las actividades como HashMaps
+        Actividad actividad = new Actividad();
+
+        // Nombre es solo un string
+        actividad.setNombre((String)hashMap.get("nombre"));
+
+        // Para horarios debemos ir recorriendo la lista y casteando respectivamente
+        ArrayList<HashMap<String, Object>> horariosHash = (ArrayList<HashMap<String, Object>>)
+                hashMap.get("horarios");
+        ArrayList<Horario> horarios = new ArrayList<>();
+        for (HashMap<String, Object> h : horariosHash) {
+            Horario horario = new Horario();
+            horario.setHs_fin((String)h.get("hs_fin"));
+            horario.setHs_inicio((String)h.get("hs_inicio"));
+            // Al llegar a la lista de dias, ya no hace falta seguir casteando
+            ArrayList<Integer> dias = arrayLongToIntegers((ArrayList<Long>) h.get("dias"));
+            horario.setDias(dias);
+            horarios.add(horario);
+        }
+        actividad.setHorarios(horarios);
+        return actividad; // Devolvemos la actividad generada
+    }
+
+    private static ArrayList<Integer> arrayLongToIntegers(ArrayList<Long> lista) {
+        int nInts = lista.size();
+        ArrayList<Integer> ints = new ArrayList<>(nInts);
+        for (int i=0;i<nInts;++i) {
+            ints.add(lista.get(i).intValue());
+        }
+        return ints;
     }
 }
