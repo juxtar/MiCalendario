@@ -75,11 +75,9 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                     actividad.agregarId(dataSnapshot.getKey());
 
                     ArrayList<WeekViewEvent> activityEvents = actividad.toWeekViewEvents();
-                    Random rnd = new Random();
-                    int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
                     for (WeekViewEvent e : activityEvents) {
                         e.setName(actividad.getNombre());
-                        e.setColor(color);
+                        e.setColor(actividad.getColor());
                     }
 
                     weekViewEvents.addAll(activityEvents);
