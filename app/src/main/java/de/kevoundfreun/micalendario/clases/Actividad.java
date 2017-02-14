@@ -16,6 +16,7 @@ public class Actividad implements Serializable{
     String nombre;
     //TODO: agregar lugar
     ArrayList<Horario> horarios;
+    String id;
 
     public Actividad(String nombre, ArrayList<Horario> horarios) {
         this.nombre = nombre;
@@ -41,6 +42,10 @@ public class Actividad implements Serializable{
     public void setHorarios(ArrayList<Horario> horarios) {
         this.horarios = horarios;
     }
+
+    public void agregarId(String id) { this.id = id; }
+
+    public String obtenerId() { return this.id; }
 
     public ArrayList<WeekViewEvent> toWeekViewEvents(){
         ArrayList<WeekViewEvent> listaEventos = new ArrayList<>();
