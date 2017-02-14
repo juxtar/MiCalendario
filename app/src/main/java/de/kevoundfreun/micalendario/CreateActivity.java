@@ -2,6 +2,7 @@ package de.kevoundfreun.micalendario;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -13,10 +14,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.NumberPicker;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,6 +42,14 @@ public class CreateActivity extends AppCompatActivity {
     NumberPicker np_min_fin;
     HorarioAdapter adapter;
 
+    CheckBox lunes;
+    CheckBox martes;
+    CheckBox miercoles;
+    CheckBox jueves;
+    CheckBox viernes;
+    CheckBox sabado;
+    CheckBox domingo;
+
     Actividad actividad = new Actividad();
 
     @Override
@@ -50,6 +61,31 @@ public class CreateActivity extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_horario);
         ListView listaHorarios = (ListView) findViewById(R.id.lv_lista_horarios);
+        final Intent intent = getIntent();
+
+        // Database
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        // Auth
+        mAuth = FirebaseAuth.getInstance();
+
+
+        //TODO: CORROBAR QUE ESTE IF Y LAS FUNCIONALIDADES DENTRO ESTAN BIEN UBICADAS
+
+        //CARGA CON INFORMACION LA PANTALLA SI ESTOY MODIFICANDO ACTIVIDAD
+        if(intent.hasExtra("Actividad_cargada")){
+            //Levanto la actividad desde el intent
+            Actividad actividad_recibida = (Actividad) intent.getSerializableExtra("Actividad_cargada");
+            //seteo el nombre de la actividad en el editText
+            EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
+            nombreActividad.setText(actividad_recibida.getNombre());
+            //seteo la lista de horarios de la actividad en el listview
+            adapter = new HorarioAdapter(this, actividad_recibida.getHorarios());
+        }
+        else{
+            adapter = new HorarioAdapter(this, actividad.getHorarios());
+        }
+        listaHorarios.setAdapter(adapter);
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,18 +95,30 @@ public class CreateActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+        listaHorarios.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getApplicationContext(), "Accediste a modificar", Toast.LENGTH_SHORT).show();
+                Horario horario_actual;
+                if(intent.hasExtra("Actividad_cargada")){
+                    Actividad actividad = (Actividad) intent.getSerializableExtra("Actividad_cargada");
+                    horario_actual = actividad.getHorarios().get(i);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Aun no hay horarios", Toast.LENGTH_SHORT).show();
+                    horario_actual = actividad.getHorarios().get(i);
+                }
+                Dialog dialog = createDialog();
+                cargarDialog();
+                cargarDefaultsDialog(horario_actual);
+                dialog.show();
+                return false;
+            }
+        });
 
-        adapter = new HorarioAdapter(this, actividad.getHorarios());
-
-        listaHorarios.setAdapter(adapter);
-
-        // Database
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        // Auth
-        mAuth = FirebaseAuth.getInstance();
     }
 
+    //Metodo para cargar el dialogo para crear el horario
     private void cargarDialog(){
 
         np_hs_ini = (NumberPicker) dialogView.findViewById(R.id.np_hs_inicio);
@@ -90,10 +138,10 @@ public class CreateActivity extends AppCompatActivity {
         np_min_fin.setMaxValue(59);
 
 
-        np_hs_ini.setWrapSelectorWheel(false);
+        /*np_hs_ini.setWrapSelectorWheel(false);
         np_min_ini.setWrapSelectorWheel(false);
         np_hs_fin.setWrapSelectorWheel(false);
-        np_min_fin.setWrapSelectorWheel(false);
+        np_min_fin.setWrapSelectorWheel(false);*/
 
         np_hs_ini.setFormatter(new DoubleDigitFormatter());
         np_min_ini.setFormatter(new DoubleDigitFormatter());
@@ -101,6 +149,54 @@ public class CreateActivity extends AppCompatActivity {
         np_min_fin.setFormatter(new DoubleDigitFormatter());
 
 
+    }
+
+    //Metodo para cargar el dialogo para MODIFICAR el horario CON INFORMACION DEL LISTVIEW
+    private void cargarDefaultsDialog(Horario horario){
+        np_hs_ini = (NumberPicker) dialogView.findViewById(R.id.np_hs_inicio);
+        np_min_ini = (NumberPicker) dialogView.findViewById(R.id.np_min_inicio);
+        np_hs_fin = (NumberPicker) dialogView.findViewById(R.id.np_hs_fin);
+        np_min_fin = (NumberPicker) dialogView.findViewById(R.id.np_min_fin);
+
+        np_hs_ini.setValue(Integer.parseInt(horario.getHs_inicio().substring(0,2)));
+        np_min_ini.setValue(Integer.parseInt(horario.getHs_inicio().substring(4)));
+        np_hs_fin.setValue(Integer.parseInt(horario.getHs_fin().substring(0,2)));
+        np_min_fin.setValue(Integer.parseInt(horario.getHs_fin().substring(4)));
+
+        domingo = (CheckBox) dialogView.findViewById(R.id.domingo);
+        lunes = (CheckBox) dialogView.findViewById(R.id.lunes);
+        martes = (CheckBox) dialogView.findViewById(R.id.martes);
+        miercoles = (CheckBox) dialogView.findViewById(R.id.miercoles);
+        jueves = (CheckBox) dialogView.findViewById(R.id.jueves);
+        viernes = (CheckBox) dialogView.findViewById(R.id.viernes);
+        sabado = (CheckBox) dialogView.findViewById(R.id.sabado);
+
+        ArrayList<Integer> dias = horario.getDias();
+        for(Integer i: dias){
+            switch (i){
+                case 0:
+                    domingo.setChecked(true);
+                    break;
+                case 1:
+                    lunes.setChecked(true);
+                    break;
+                case 2:
+                    martes.setChecked(true);
+                    break;
+                case 3:
+                    miercoles.setChecked(true);
+                    break;
+                case 4:
+                    jueves.setChecked(true);
+                    break;
+                case 5:
+                    viernes.setChecked(true);
+                    break;
+                case 6:
+                    sabado.setChecked(true);
+                    break;
+            }
+        }
     }
 
 
@@ -118,7 +214,6 @@ public class CreateActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.aceptar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO: guardar horarios
                         Horario horario;
                         ArrayList<Integer> dias = new ArrayList<Integer>();
                         String hs_inicio;

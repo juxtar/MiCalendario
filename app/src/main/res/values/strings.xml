@@ -36,6 +36,5 @@
     <string name="eliminar">Eliminar</string>
 
     <string name="exit_dialog">¿Está seguro que desea salir?</string>
-    <string name="dialog_confirmar_borrar">¿Qué desea hacer con la actividad?</string>
     <string name="exit_confirm">Salir</string>
 </resources>

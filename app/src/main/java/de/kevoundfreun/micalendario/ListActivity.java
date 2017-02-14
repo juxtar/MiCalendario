@@ -71,7 +71,7 @@ public class ListActivity extends AppCompatActivity {
 
     }
 
-    private Dialog createDialog(Actividad act) {
+    private Dialog createDialog(final Actividad act) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ListActivity.this);
         // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
@@ -88,6 +88,10 @@ public class ListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int id) {
                         //TODO: abrir nueva actividad para modificar la actividad seleccionada
                         Toast.makeText(getApplicationContext(), "MODIFICAR Actividad", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(ListActivity.this, CreateActivity.class);
+                        intent.putExtra("Actividad_cargada",act);
+                        startActivity(intent);
+
                         //para que haga refresh en la lista de actividades del listView
                         adapter.notifyDataSetChanged();
 
