@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Mi Calendario</string>
+    <string name="action_ver_actividades">Ver actividades</string>
     <string name="action_settings">Settings</string>
     <string name="action_logout">Desconectarse</string>
+    <string name="action_back">Desconectarse</string>
     <string name="action_save">Guardar</string>
     <string name="title_activity_login">Mi Calendario</string>
 
@@ -30,6 +32,10 @@
     <string name="cancelar">Cancelar</string>
     <string name="success_actividad">¡Actividad creada con éxito!</string>
 
+    <string name="modificar">Modificar</string>
+    <string name="eliminar">Eliminar</string>
+
     <string name="exit_dialog">¿Está seguro que desea salir?</string>
+    <string name="dialog_confirmar_borrar">¿Qué desea hacer con la actividad?</string>
     <string name="exit_confirm">Salir</string>
 </resources>

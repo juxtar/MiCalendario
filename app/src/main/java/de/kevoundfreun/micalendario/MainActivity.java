@@ -133,6 +133,12 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
             finish();
             return true;
         }
+        if (id == R.id.action_ver_actividades) {
+            Intent actividad_intent = new Intent(MainActivity.this, ListActivity.class);
+            actividad_intent.putExtra("Actividades", actividades);
+            startActivity(actividad_intent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

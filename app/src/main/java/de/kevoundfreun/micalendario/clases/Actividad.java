@@ -4,6 +4,7 @@ import android.widget.ArrayAdapter;
 
 import com.alamkanak.weekview.WeekViewEvent;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -11,7 +12,7 @@ import java.util.HashMap;
  * Created by ke on 12/2/2017.
  */
 
-public class Actividad {
+public class Actividad implements Serializable{
     String nombre;
     //TODO: agregar lugar
     ArrayList<Horario> horarios;
@@ -82,5 +83,10 @@ public class Actividad {
             ints.add(lista.get(i).intValue());
         }
         return ints;
+    }
+
+    @Override
+    public String toString() {
+        return nombre;
     }
 }
