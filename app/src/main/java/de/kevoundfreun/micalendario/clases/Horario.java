@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by ke on 12/2/2017.
@@ -87,32 +88,27 @@ public class Horario implements Serializable{
 
         ArrayList<WeekViewEvent> listaEventos = new ArrayList<>();
 
-        /*for(Integer dia : getDias()) {
+        for(Integer dia : getDias()) {
             // Initialize start and end time.
+
             Calendar now = Calendar.getInstance();
             Calendar startTime = (Calendar) now.clone();
             startTime.setTimeInMillis(start.getTime());
             startTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
             startTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
-            startTime.set(Calendar.DAY_OF_MONTH, 14);
-            Calendar endTime = (Calendar) now.clone();
-            endTime.setTimeInMillis(end.getTime());
-            endTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
-            endTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
-            endTime.set(Calendar.DAY_OF_MONTH, 14);
+            startTime.set(Calendar.DAY_OF_WEEK, dia);
+            startTime.setTimeInMillis(startTime.getTimeInMillis() + (1000 * 24 * 3600 * 7));
+            startTime.getTimeInMillis();
+            Calendar endTime = (Calendar) startTime.clone();
+            endTime.setTimeInMillis(startTime.getTimeInMillis()+(end.getTime()-start.getTime()));
 
             // Create an week view event.
             WeekViewEvent weekViewEvent = new WeekViewEvent();
             weekViewEvent.setName("");
             weekViewEvent.setStartTime(startTime);
             weekViewEvent.setEndTime(endTime);
-            weekViewEvent.setColor(Color.BLUE);
             listaEventos.add(weekViewEvent);
-        }*/
-        WeekViewEvent event = new WeekViewEvent(0, "JORGE", 2017, 2, 16, 10, 4, 2017, 2, 16, 12, 5);
-        event.setColor(Color.RED);
-        Log.d("Horario", event.getName());
-        listaEventos.add(event);
+        }
         return listaEventos;
     }
 }
