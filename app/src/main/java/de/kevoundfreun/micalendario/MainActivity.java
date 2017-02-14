@@ -3,6 +3,7 @@ package de.kevoundfreun.micalendario;
 import android.app.usage.UsageEvents;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -28,8 +29,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import de.kevoundfreun.micalendario.clases.Actividad;
 
@@ -69,7 +72,17 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Actividad actividad = Actividad.fromHashMap((HashMap<String, Object>) dataSnapshot.getValue());
-                    weekViewEvents.addAll(actividad.toWeekViewEvents());
+                    actividad.agregarId(dataSnapshot.getKey());
+
+                    ArrayList<WeekViewEvent> activityEvents = actividad.toWeekViewEvents();
+                    Random rnd = new Random();
+                    int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                    for (WeekViewEvent e : activityEvents) {
+                        e.setName(actividad.getNombre());
+                        e.setColor(color);
+                    }
+
+                    weekViewEvents.addAll(activityEvents);
                     actividades.add(actividad);
                 }
 
@@ -126,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Log.d("MainActivity", "Stop");
             return true;
         }
         if (id == R.id.action_logout) {
@@ -145,7 +159,23 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
     @Override
     public List<? extends WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-        return weekViewEvents;
+        ArrayList<WeekViewEvent> eventos = new ArrayList<>();
+        for (WeekViewEvent event: weekViewEvents) {
+            WeekViewEvent e = new WeekViewEvent(event.getId(), event.getName(), (Calendar) event.getStartTime().clone(), (Calendar) event.getEndTime().clone());
+            e.setColor(event.getColor());
+            Calendar startTime = e.getStartTime();
+            startTime.set(Calendar.MONTH, newMonth-1);
+            startTime.set(Calendar.YEAR, newYear);
+            startTime.getTimeInMillis();
+            e.setStartTime(startTime);
+            Calendar endTime = e.getEndTime();
+            endTime.set(Calendar.MONTH, newMonth-1);
+            endTime.set(Calendar.YEAR, newYear);
+            endTime.getTimeInMillis();
+            e.setEndTime(endTime);
+            eventos.add(e);
+        }
+        return eventos;
     }
 
     @Override
