@@ -67,6 +67,8 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
         String hs = "De :    " + horario.getHs_inicio()+"  a  "+horario.getHs_fin();
         tvHorario.setText(hs);
 
+        //TODO: Agregar boton para borrar un horario de la lista
+
         // Return the completed view to render on screen
         return convertView;
     }

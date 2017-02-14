@@ -90,7 +90,7 @@ public class CreateActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = createDialog();
+                Dialog dialog = createDialog(false, null);
                 cargarDialog();
                 dialog.show();
             }
@@ -98,17 +98,17 @@ public class CreateActivity extends AppCompatActivity {
         listaHorarios.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getApplicationContext(), "Accediste a modificar", Toast.LENGTH_SHORT).show();
                 Horario horario_actual;
                 if(intent.hasExtra("Actividad_cargada")){
                     Actividad actividad = (Actividad) intent.getSerializableExtra("Actividad_cargada");
                     horario_actual = actividad.getHorarios().get(i);
                 }
                 else {
-                    Toast.makeText(getApplicationContext(), "Aun no hay horarios", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Modificar horario de actividad no creada", Toast.LENGTH_SHORT).show();
                     horario_actual = actividad.getHorarios().get(i);
+
                 }
-                Dialog dialog = createDialog();
+                Dialog dialog = createDialog(true, horario_actual);
                 cargarDialog();
                 cargarDefaultsDialog(horario_actual);
                 dialog.show();
@@ -200,7 +200,7 @@ public class CreateActivity extends AppCompatActivity {
     }
 
 
-    private Dialog createDialog(){
+    private Dialog createDialog(final boolean modify, final Horario oldHorario){
         AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
         // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
@@ -226,12 +226,19 @@ public class CreateActivity extends AppCompatActivity {
                         hs_final = String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_hs_fin)).getValue()) +":"+
                                 String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue());
 
-                        horario = new Horario(hs_inicio,hs_final,dias);
-                        actividad.getHorarios().add(horario);
-                        adapter.notifyDataSetChanged();
-                        if(((ArrayList<Horario>) actividad.getHorarios()).size()>0) {
-                            Log.v("HORARIOS", (((ArrayList<Horario>) actividad.getHorarios()).get(0)).toString());
+                        if(!modify) {
+                            horario = new Horario(hs_inicio, hs_final, dias);
+                            actividad.getHorarios().add(horario);
+                            if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
+                                Log.v("HORARIOS", (((ArrayList<Horario>) actividad.getHorarios()).get(0)).toString());
+                            }
                         }
+                        else{
+                            oldHorario.setDias(dias);
+                            oldHorario.setHs_inicio(hs_inicio);
+                            oldHorario.setHs_fin(hs_final);
+                        }
+                        adapter.notifyDataSetChanged();
                         dialog.dismiss();
                     }
                 })
@@ -301,7 +308,19 @@ public class CreateActivity extends AppCompatActivity {
     private void agregarActividad(String uid) {
         EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
         actividad.setNombre(nombreActividad.getText().toString());
-        mDatabase.child("users").child(uid).child("actividades").push()
-                .setValue(actividad);
+        if(getIntent().hasExtra("Actividad_cargada")){
+            String idAct = ((Actividad) getIntent().getSerializableExtra("Actividad_cargada")).obtenerId();
+            // TODO: actualizar actividad en la base de datos
+            // Aca trate, sin exito, de actualizar solamente el nombre de la actividad para probar,
+            // pero en realidad necesito cambiar TODA la actividad (hs de inicio, final y arrayList de dias
+            Toast.makeText(getApplicationContext(),
+                    "Modificaste la actividad, pero no se guardo en la base de datos",
+                    Toast.LENGTH_SHORT).show();
+            // mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(["nombre":nombreActividad]);
+        }
+        else {
+            mDatabase.child("users").child(uid).child("actividades").push()
+                    .setValue(actividad);
+        }
     }
 }

@@ -31,6 +31,9 @@ public class Actividad implements Serializable{
 
     public Actividad() {
         this.horarios = new ArrayList<>();
+        Random rnd = new Random();
+        int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        this.color = color;
     }
 
     public int getColor() {

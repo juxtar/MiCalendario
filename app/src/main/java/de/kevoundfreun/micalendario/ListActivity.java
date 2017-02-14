@@ -86,7 +86,6 @@ public class ListActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.modificar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO: abrir nueva actividad para modificar la actividad seleccionada
                         Toast.makeText(getApplicationContext(), "MODIFICAR Actividad", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(ListActivity.this, CreateActivity.class);
                         intent.putExtra("Actividad_cargada",act);
@@ -100,8 +99,13 @@ public class ListActivity extends AppCompatActivity {
                 })
                 .setNegativeButton(R.string.eliminar, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        //TODO: eliminar actividad de la base de datos
+                        String idAct = act.obtenerId();
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        String uid = firebaseUser.getUid();
+
                         Toast.makeText(getApplicationContext(), "ELIMINAR Actividad", Toast.LENGTH_SHORT).show();
+                        //TODO: actualizar la lista de actividades -> ahora hay que reiniciar la app para que cambios tengan efecto
+                        mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(null);
                         dialog.dismiss();
                     }
                 });
