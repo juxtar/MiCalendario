@@ -40,9 +40,9 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
 
-    ArrayList<Actividad> actividades = new ArrayList<>();
-    ArrayList<WeekViewEvent> weekViewEvents = new ArrayList<>();
-
+    ArrayList<Actividad> actividades;
+    ArrayList<WeekViewEvent> weekViewEvents;
+    FirebaseUser usuario;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,13 +59,40 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
             }
         });
 
+
         //Auth
         mAuth = FirebaseAuth.getInstance();
 
         //Acceso Database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        FirebaseUser usuario = mAuth.getCurrentUser();
+        usuario = mAuth.getCurrentUser();
+
+
+        // Get a reference for the week view in the layout.
+        WeekView mWeekView = (WeekView) findViewById(R.id.weekView);
+
+        // Set an action when any event is clicked.
+        mWeekView.setOnEventClickListener(this);
+
+        // The week view has infinite scrolling horizontally. We have to provide the events of a
+        // month every time the month changes on the week view.
+        mWeekView.setMonthChangeListener(this);
+
+        // Set long press listener for events.
+        mWeekView.setEventLongPressListener(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+    public void onResume(){
+        super.onResume();
+        weekViewEvents = new ArrayList<>();
+        actividades = new ArrayList<>();
         if(usuario != null){
             Query query = mDatabase.child("users").child(usuario.getUid()).child("actividades");
             query.orderByKey().addChildEventListener(new ChildEventListener() {
@@ -106,28 +133,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
             });
         }
 
-
-        // Get a reference for the week view in the layout.
-        WeekView mWeekView = (WeekView) findViewById(R.id.weekView);
-
-        // Set an action when any event is clicked.
-        mWeekView.setOnEventClickListener(this);
-
-        // The week view has infinite scrolling horizontally. We have to provide the events of a
-        // month every time the month changes on the week view.
-        mWeekView.setMonthChangeListener(this);
-
-        // Set long press listener for events.
-        mWeekView.setEventLongPressListener(this);
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
