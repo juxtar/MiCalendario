@@ -431,12 +431,7 @@ public class CreateActivity extends AppCompatActivity {
         EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
         actividad.setNombre(nombreActividad.getText().toString());
 
-        Toast.makeText(getApplicationContext(),
-                "Modificaste la actividad, pero no se guardo en la base de datos",
-                Toast.LENGTH_SHORT).show();
-        // TODO: actualizar actividad en la base de datos
-        // Aca trate, sin exito, de actualizar solamente el nombre de la actividad para probar,
-        // pero en realidad necesito cambiar TODA la actividad (hs de inicio, final y arrayList de dias
-        // mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(["nombre":nombreActividad]);
+        mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(actividad);
+        finish();
     }
 }
