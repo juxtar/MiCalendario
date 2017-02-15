@@ -126,6 +126,7 @@ public class ListActivity extends AppCompatActivity {
 
     private void eliminarActividad(String uid, String idAct) {
         mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(null);
+        
     }
 
     @Override

@@ -62,6 +62,7 @@ public class CreateActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_horario);
         ListView listaHorarios = (ListView) findViewById(R.id.lv_lista_horarios);
         final Intent intent = getIntent();
+        EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
 
         // Database
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -74,12 +75,11 @@ public class CreateActivity extends AppCompatActivity {
         //CARGA CON INFORMACION LA PANTALLA SI ESTOY MODIFICANDO ACTIVIDAD
         if(intent.hasExtra("Actividad_cargada")){
             //Levanto la actividad desde el intent
-            Actividad actividad_recibida = (Actividad) intent.getSerializableExtra("Actividad_cargada");
+            actividad = (Actividad) intent.getSerializableExtra("Actividad_cargada");
             //seteo el nombre de la actividad en el editText
-            EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
-            nombreActividad.setText(actividad_recibida.getNombre());
+            nombreActividad.setText(actividad.getNombre());
             //seteo la lista de horarios de la actividad en el listview
-            adapter = new HorarioAdapter(this, actividad_recibida.getHorarios());
+            adapter = new HorarioAdapter(this, actividad.getHorarios());
         }
         else{
             adapter = new HorarioAdapter(this, actividad.getHorarios());
@@ -90,7 +90,7 @@ public class CreateActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = createDialog(false, null);
+                Dialog dialog = createDialog(null);
                 cargarDialog();
                 dialog.show();
             }
@@ -98,19 +98,10 @@ public class CreateActivity extends AppCompatActivity {
         listaHorarios.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Horario horario_actual;
-                if(intent.hasExtra("Actividad_cargada")){
-                    Actividad actividad = (Actividad) intent.getSerializableExtra("Actividad_cargada");
-                    horario_actual = actividad.getHorarios().get(i);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "Modificar horario de actividad no creada", Toast.LENGTH_SHORT).show();
-                    horario_actual = actividad.getHorarios().get(i);
 
-                }
-                Dialog dialog = createDialog(true, horario_actual);
+                Dialog dialog = createDialog(actividad.getHorarios().get(i));
                 cargarDialog();
-                cargarDefaultsDialog(horario_actual);
+                cargarDefaultsDialog(actividad.getHorarios().get(i));
                 dialog.show();
                 return false;
             }
@@ -200,7 +191,7 @@ public class CreateActivity extends AppCompatActivity {
     }
 
 
-    private Dialog createDialog(final boolean modify, final Horario oldHorario){
+    private Dialog createDialog(final Horario oldHorario){
         AlertDialog.Builder builder = new AlertDialog.Builder(CreateActivity.this);
         // Get the layout inflater
         LayoutInflater inflater = getLayoutInflater();
@@ -227,7 +218,7 @@ public class CreateActivity extends AppCompatActivity {
                                 String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue());
 
                         //TODO: cuando vengo desde ListActivity y agrego un horario y le mando aceptar, el nuevo horario no se muestra en el listview
-                        if(!modify) {
+                        if(oldHorario == null) {
                             horario = new Horario(hs_inicio, hs_final, dias);
                             actividad.getHorarios().add(horario);
                             if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
@@ -240,6 +231,7 @@ public class CreateActivity extends AppCompatActivity {
                             oldHorario.setHs_inicio(hs_inicio);
                             oldHorario.setHs_fin(hs_final);
                         }
+
                         adapter.notifyDataSetChanged();
                         dialog.dismiss();
                     }

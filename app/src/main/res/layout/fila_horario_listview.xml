@@ -5,7 +5,8 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:descendantFocusability="blocksDescendants">
 
     <LinearLayout
         android:orientation="vertical"
