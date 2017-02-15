@@ -7,7 +7,9 @@ import com.alamkanak.weekview.WeekViewEvent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -112,5 +114,26 @@ public class Actividad implements Serializable{
     @Override
     public String toString() {
         return nombre;
+    }
+
+    public Calendar calcularProximoHorario() {
+        long now = Calendar.getInstance().getTimeInMillis();
+        long milisProximoHorario = 0;
+        for (Horario h : horarios) {
+            List<WeekViewEvent> eventos = h.toWeekViewEvents();
+            int i = 1;
+            milisProximoHorario = eventos.get(0).getStartTime().getTimeInMillis() - now;
+            long milisProximoWeekViewEvent = milisProximoHorario;
+            while (milisProximoWeekViewEvent < (1000 * 24 * 3600 * 7)) {
+                WeekViewEvent e = eventos.get(i);
+                milisProximoWeekViewEvent = e.getStartTime().getTimeInMillis() - now;
+                i++;
+                if (milisProximoWeekViewEvent < milisProximoHorario)
+                    milisProximoHorario = milisProximoWeekViewEvent;
+            }
+        }
+        Calendar proximoHorario = Calendar.getInstance();
+        proximoHorario.setTimeInMillis(milisProximoHorario);
+        return proximoHorario;
     }
 }
