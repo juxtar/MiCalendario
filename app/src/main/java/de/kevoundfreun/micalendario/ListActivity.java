@@ -33,7 +33,7 @@ public class ListActivity extends AppCompatActivity {
 
     View dialogView;
     ActividadAdapter adapter;
-
+    ArrayList<Actividad> lista_actividades;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +53,7 @@ public class ListActivity extends AppCompatActivity {
         //Levantar lista de actividades del usuario
 
         Intent intent_actividades = getIntent();
-        final ArrayList<Actividad> lista_actividades = (ArrayList<Actividad>) intent_actividades.getSerializableExtra("Actividades");
+        lista_actividades = (ArrayList<Actividad>) intent_actividades.getSerializableExtra("Actividades");
 
         // Creamos el adapter para mostrar la lista de actividades por el listView
         adapter = new ActividadAdapter(ListActivity.this,lista_actividades);
@@ -126,7 +126,12 @@ public class ListActivity extends AppCompatActivity {
 
     private void eliminarActividad(String uid, String idAct) {
         mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(null);
-        
+        for(Actividad ac : lista_actividades){
+            if(ac.obtenerId() == idAct){
+                lista_actividades.remove(ac);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
