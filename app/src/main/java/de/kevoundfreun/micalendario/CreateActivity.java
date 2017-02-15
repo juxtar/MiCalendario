@@ -238,7 +238,9 @@ public class CreateActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(),"Las actividades no pueden superponerse.", Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                if(verificarSuperpuesta(new Horario(hs_inicio,hs_final,dias), actividad.getHorarios())) {
+                                ArrayList listanueva = (ArrayList)actividad.getHorarios().clone();
+                                listanueva.remove(oldHorario);
+                                if(verificarSuperpuesta(new Horario(hs_inicio,hs_final,dias), listanueva)) {
                                     oldHorario.setDias(dias);
                                     oldHorario.setHs_inicio(hs_inicio);
                                     oldHorario.setHs_fin(hs_final);
@@ -272,52 +274,66 @@ public class CreateActivity extends AppCompatActivity {
                 });
         return builder.create();
     }
-
+    // Método que busca verificar que una misma actividad no tenga dos horarios superpuestos
     private boolean verificarSuperpuesta(Horario horario, ArrayList<Horario> horarios) {
         boolean result;
+        //Verificamos que hay algún horario cargado ya en la actividad.
         if(horarios.size()== 0){
-            result = true;
+            return true;
         }
-        else{
-            result = false;
-        }
+        //Obtenemos las horas y minutos de inicio y final del nuevo horario que se está queriendo agregar
         int horario_inicio_hora = Integer.parseInt(horario.getHs_inicio().substring(0,2));
         int horario_inicio_min = Integer.parseInt(horario.getHs_inicio().substring(3));
         int horario_fin_hora = Integer.parseInt(horario.getHs_fin().substring(0,2));
         int horario_fin_min = Integer.parseInt(horario.getHs_fin().substring(3));
+        //Recorremos la lista de horarios de la actividad.
         for (Horario h : horarios) {
+            //Obtenemos las horas y minutos de inicio y fin de cada elemento que está en la actividad.
             int h_inicio_hora = Integer.parseInt(h.getHs_inicio().substring(0,2));
             int h_inicio_min = Integer.parseInt(h.getHs_inicio().substring(3));
             int h_fin_hora = Integer.parseInt(h.getHs_fin().substring(0,2));
             int h_fin_min = Integer.parseInt(h.getHs_fin().substring(3));
+            /*Comparamos cada día de la lista de días del nuevo horario con cada uno de los días de la lista de
+            días del horario con el que vamos a comparar*/
             for (int x : horario.getDias()) {
                 for (int y : h.getDias()) {
+                    //Si son el mismo día, realizamos las validaciones.
                     if (x == y) {
                         if ((horario_inicio_hora < h_inicio_hora)) {
-                            if (horario_fin_hora < h_inicio_hora) {
-                                result = true;
+                            if (horario_fin_hora > h_inicio_hora) {
+                                return false;
                             }
                             else{
-                                if((horario_fin_hora == h_inicio_hora) && (horario_fin_min < h_inicio_min)){
-                                    result = true;
+                                if((horario_fin_hora == h_inicio_hora) && (horario_fin_min >= h_inicio_min)){
+                                    return false;
+                                }
+                                else{
+                                    if (horario_fin_hora > h_fin_hora){
+                                        return false;
+                                    }
+                                    else{
+                                        if((horario_fin_hora == h_fin_hora) && (horario_fin_min > h_fin_min)){
+                                            return false;
+                                        }
+                                    }
                                 }
 
                             }
                         }
                         else {
                             if (horario_inicio_hora == h_inicio_hora) {
-                                if (horario_fin_min < h_inicio_min){
-                                    result = true;
+                                if (horario_fin_min >= h_inicio_min){
+                                    return false;
                                 }
                             }
                             else{
-                                if (horario_inicio_hora > h_fin_hora){
-                                    result = true;
+                                if (horario_inicio_hora < h_fin_hora){
+                                    return false;
                                 }
                                 else{
                                     if(horario_inicio_hora == h_fin_hora){
-                                        if(horario_inicio_min > h_fin_min){
-                                            result = true;
+                                        if(horario_inicio_min < h_fin_min){
+                                            return false;
                                         }
                                     }
 
@@ -329,7 +345,7 @@ public class CreateActivity extends AppCompatActivity {
                 }
             }
         }
-        return result;
+        return true;
     }
 
 
