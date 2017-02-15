@@ -35,6 +35,12 @@
     <string name="modificar">Modificar</string>
     <string name="eliminar">Eliminar</string>
 
+    <!-- Strings related to preferences -->
+    <string name="pref_usuario">Preferencias</string>
+    <string name="pref_email">Email</string>
+    <string name="pref_ringtone">Ringtone</string>
+
+
     <string name="exit_dialog">¿Está seguro que desea salir?</string>
     <string name="exit_confirm">Salir</string>
 </resources>

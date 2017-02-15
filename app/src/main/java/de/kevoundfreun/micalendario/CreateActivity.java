@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.Toast;
@@ -61,7 +62,7 @@ public class CreateActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_horario);
-        ListView listaHorarios = (ListView) findViewById(R.id.lv_lista_horarios);
+        final ListView listaHorarios = (ListView) findViewById(R.id.lv_lista_horarios);
         final Intent intent = getIntent();
         EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
 
@@ -96,6 +97,7 @@ public class CreateActivity extends AppCompatActivity {
                 dialog.show();
             }
         });
+
         listaHorarios.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -107,6 +109,25 @@ public class CreateActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        listaHorarios.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                ImageButton btnEleminarHorario = (ImageButton) view.findViewById(R.id.horarioBtnEliminar);
+                btnEleminarHorario.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //TODO: ver como acceder a la lista de horarios y borrar el que corresponde a este btnEliminar
+                        actividad.getHorarios().remove(i);
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(), "ELIMINAR horario", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+        /*ImageButton btnEliminarHorario = (ImageButton) convertView.findViewById(R.id.horarioBtnEliminar);
+
+        */
 
     }
 

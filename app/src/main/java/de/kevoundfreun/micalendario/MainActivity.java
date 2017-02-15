@@ -147,6 +147,8 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Log.d("MainActivity", "Stop");
+            Intent intent_settings = new Intent(this, SettingsActivity.class);
+            startActivity(intent_settings);
             return true;
         }
         if (id == R.id.action_logout) {
