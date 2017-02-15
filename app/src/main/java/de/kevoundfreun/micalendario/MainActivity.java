@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
 
+    WeekView mWeekView;
+
     ArrayList<Actividad> actividades;
     ArrayList<WeekViewEvent> weekViewEvents;
     FirebaseUser usuario;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
 
         // Get a reference for the week view in the layout.
-        WeekView mWeekView = (WeekView) findViewById(R.id.weekView);
+        mWeekView = (WeekView) findViewById(R.id.weekView);
 
         // Set an action when any event is clicked.
         mWeekView.setOnEventClickListener(this);
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
                     weekViewEvents.addAll(activityEvents);
                     actividades.add(actividad);
+                    mWeekView.notifyDatasetChanged();
                 }
 
                 @Override
@@ -169,11 +172,13 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
             e.setColor(event.getColor());
             Calendar startTime = e.getStartTime();
             startTime.set(Calendar.MONTH, newMonth-1);
+            startTime.set(Calendar.DAY_OF_WEEK, event.getStartTime().get(Calendar.DAY_OF_WEEK));
             startTime.set(Calendar.YEAR, newYear);
             startTime.getTimeInMillis();
             e.setStartTime(startTime);
             Calendar endTime = e.getEndTime();
             endTime.set(Calendar.MONTH, newMonth-1);
+            endTime.set(Calendar.DAY_OF_WEEK, event.getEndTime().get(Calendar.DAY_OF_WEEK));
             endTime.set(Calendar.YEAR, newYear);
             endTime.getTimeInMillis();
             e.setEndTime(endTime);

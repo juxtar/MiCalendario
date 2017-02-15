@@ -97,7 +97,7 @@ public class Horario implements Serializable{
                 startTime.setTimeInMillis(start.getTime());
                 startTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
                 startTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
-                startTime.set(Calendar.DAY_OF_WEEK, dia);
+                startTime.set(Calendar.DAY_OF_WEEK, dia+1);
                 startTime.setTimeInMillis(startTime.getTimeInMillis() + i*(1000 * 24 * 3600 * 7));
                 startTime.getTimeInMillis();
                 Calendar endTime = (Calendar) startTime.clone();
