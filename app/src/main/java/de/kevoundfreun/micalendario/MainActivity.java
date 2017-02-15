@@ -1,8 +1,11 @@
 package de.kevoundfreun.micalendario;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.usage.UsageEvents;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -27,14 +30,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import de.kevoundfreun.micalendario.clases.Actividad;
+import de.kevoundfreun.micalendario.receivers.ReceptorAlarma;
 
 public class MainActivity extends AppCompatActivity implements WeekView.EventLongPressListener, WeekView.EventClickListener, MonthLoader.MonthChangeListener {
     private FirebaseAuth mAuth;
@@ -45,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     ArrayList<Actividad> actividades;
     ArrayList<WeekViewEvent> weekViewEvents;
     FirebaseUser usuario;
+    ReceptorAlarma receptor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,15 +69,15 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
             }
         });
 
+        // Setear Receptor de Alarma
+        receptor = new ReceptorAlarma();
 
         //Auth
         mAuth = FirebaseAuth.getInstance();
+        usuario = mAuth.getCurrentUser();
 
         //Acceso Database
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        usuario = mAuth.getCurrentUser();
-
 
         // Get a reference for the week view in the layout.
         mWeekView = (WeekView) findViewById(R.id.weekView);
@@ -91,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     public void onResume(){
         super.onResume();
         weekViewEvents = new ArrayList<>();
@@ -111,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
                     weekViewEvents.addAll(activityEvents);
                     actividades.add(actividad);
-                    mWeekView.notifyDatasetChanged();
                 }
 
                 @Override
@@ -134,8 +142,20 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
                 }
             });
-        }
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mWeekView.notifyDatasetChanged();
+                    receptor.setActividades(actividades);
+                    programarProximaAlarma();
+                }
 
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -216,5 +236,44 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 });
         // Create the AlertDialog object and return it
         builder.create().show();
+    }
+
+    private void programarProximaAlarma() {
+        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        final String ALARMA = "de.kevoundfreun.micalendario.MainActivity.ReceptorAlarma";
+        IntentFilter intentFilter = new IntentFilter(ALARMA);
+        ReceptorAlarma receptor = new ReceptorAlarma();
+        registerReceiver(receptor, intentFilter);
+
+        Intent alarmaIntent = new Intent(this, ReceptorAlarma.class);
+        HashMap<String, Object> proxActividad = calcularProximaActividad(actividades);
+        alarmaIntent.putExtra("proxActividad", proxActividad);
+
+        PendingIntent pi = PendingIntent.getBroadcast(this.getApplicationContext(), 1,
+                alarmaIntent, 0);
+        Calendar cal = Calendar.getInstance();
+        long quinceminutos = 900000;
+        cal.setTimeInMillis(cal.getTimeInMillis() + quinceminutos);
+        cal.getTimeInMillis(); // Work-around lazy updating
+        am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
+    }
+
+    static public HashMap<String, Object> calcularProximaActividad(List<Actividad> actividades) {
+        HashMap<String, Object> result = new HashMap<>();
+        // Inicializo con proximo evento de la primera actividad
+        long milisProximaActividad = actividades.get(0).calcularProximoHorario().getTimeInMillis();
+        result.put("actividad", actividades.get(0));
+        for (Actividad a : actividades) {
+            long milisProximoHorario = a.calcularProximoHorario().getTimeInMillis();
+            if (milisProximoHorario < milisProximaActividad) {
+                milisProximaActividad = milisProximoHorario;
+                result.put("actividad", a);
+            }
+        }
+        Calendar proximoHorario = Calendar.getInstance();
+        proximoHorario.setTimeInMillis(milisProximaActividad);
+        result.put("horario", proximoHorario);
+        return result;
     }
 }
