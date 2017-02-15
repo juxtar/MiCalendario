@@ -88,26 +88,28 @@ public class Horario implements Serializable{
 
         ArrayList<WeekViewEvent> listaEventos = new ArrayList<>();
 
-        for(Integer dia : getDias()) {
-            // Initialize start and end time.
+        for(int i = 0;i<4;i++) {
+            for (Integer dia : getDias()) {
+                // Initialize start and end time.
 
-            Calendar now = Calendar.getInstance();
-            Calendar startTime = (Calendar) now.clone();
-            startTime.setTimeInMillis(start.getTime());
-            startTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
-            startTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
-            startTime.set(Calendar.DAY_OF_WEEK, dia);
-            startTime.setTimeInMillis(startTime.getTimeInMillis() + (1000 * 24 * 3600 * 7));
-            startTime.getTimeInMillis();
-            Calendar endTime = (Calendar) startTime.clone();
-            endTime.setTimeInMillis(startTime.getTimeInMillis()+(end.getTime()-start.getTime()));
+                Calendar now = Calendar.getInstance();
+                Calendar startTime = (Calendar) now.clone();
+                startTime.setTimeInMillis(start.getTime());
+                startTime.set(Calendar.YEAR, now.get(Calendar.YEAR));
+                startTime.set(Calendar.MONTH, now.get(Calendar.MONTH));
+                startTime.set(Calendar.DAY_OF_WEEK, dia);
+                startTime.setTimeInMillis(startTime.getTimeInMillis() + i*(1000 * 24 * 3600 * 7));
+                startTime.getTimeInMillis();
+                Calendar endTime = (Calendar) startTime.clone();
+                endTime.setTimeInMillis(startTime.getTimeInMillis() + (end.getTime() - start.getTime()));
 
-            // Create an week view event.
-            WeekViewEvent weekViewEvent = new WeekViewEvent();
-            weekViewEvent.setName("");
-            weekViewEvent.setStartTime(startTime);
-            weekViewEvent.setEndTime(endTime);
-            listaEventos.add(weekViewEvent);
+                // Create an week view event.
+                WeekViewEvent weekViewEvent = new WeekViewEvent();
+                weekViewEvent.setName("");
+                weekViewEvent.setStartTime(startTime);
+                weekViewEvent.setEndTime(endTime);
+                listaEventos.add(weekViewEvent);
+            }
         }
         return listaEventos;
     }
