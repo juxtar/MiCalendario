@@ -5,7 +5,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
@@ -16,14 +22,14 @@ import de.kevoundfreun.micalendario.clases.Horario;
  */
 
 public class HorarioAdapter extends ArrayAdapter<Horario> {
-    public HorarioAdapter(Context context, ArrayList<Horario> users) {
-        super(context, 0, users);
+    public HorarioAdapter(Context context, ArrayList<Horario> horarios) {
+        super(context, 0, horarios);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        Horario horario = getItem(position);
+        final Horario horario = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.fila_horario_listview, parent, false);
@@ -31,6 +37,15 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
         // Lookup view for data population
         TextView tvDias = (TextView) convertView.findViewById(R.id.textView_listaDias);
         TextView tvHorario = (TextView) convertView.findViewById(R.id.textView_horario);
+        ImageButton btnEliminarHorario = (ImageButton) convertView.findViewById(R.id.horarioBtnEliminar);
+
+        btnEliminarHorario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: ver como acceder a la lista de horarios y borrar el que corresponde a este btnEliminar
+                Toast.makeText(getContext(), "ELIMINAR horario", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Populate the data into the template view using the data object
 
@@ -66,8 +81,6 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
 
         String hs = "De :    " + horario.getHs_inicio()+"  a  "+horario.getHs_fin();
         tvHorario.setText(hs);
-
-        //TODO: Agregar boton para borrar un horario de la lista
 
         // Return the completed view to render on screen
         return convertView;

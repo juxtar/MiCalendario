@@ -3,6 +3,7 @@ package de.kevoundfreun.micalendario;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +40,7 @@ public class ListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_list);
         setSupportActionBar(toolbar);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_horario);
 
         //Auth
         mAuth = FirebaseAuth.getInstance();
@@ -66,6 +68,16 @@ public class ListActivity extends AppCompatActivity {
                 dialog.show();
 
                 return false;
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: lograr que la lista en ListActivity se actualice automaticamente despues de agregar una actividad desde este fab
+                // por ahora hay que volver al calendario y volver a entrar para que la lista se actualice
+                Intent intent_crear_actividad = new Intent(ListActivity.this, CreateActivity.class);
+                startActivity(intent_crear_actividad);
             }
         });
 
@@ -105,11 +117,15 @@ public class ListActivity extends AppCompatActivity {
 
                         Toast.makeText(getApplicationContext(), "ELIMINAR Actividad", Toast.LENGTH_SHORT).show();
                         //TODO: actualizar la lista de actividades -> ahora hay que reiniciar la app para que cambios tengan efecto
-                        mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(null);
+                        eliminarActividad(uid,idAct);
                         dialog.dismiss();
                     }
                 });
         return builder.create();
+    }
+
+    private void eliminarActividad(String uid, String idAct) {
+        mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(null);
     }
 
     @Override

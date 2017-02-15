@@ -226,11 +226,13 @@ public class CreateActivity extends AppCompatActivity {
                         hs_final = String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_hs_fin)).getValue()) +":"+
                                 String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue());
 
+                        //TODO: cuando vengo desde ListActivity y agrego un horario y le mando aceptar, el nuevo horario no se muestra en el listview
                         if(!modify) {
                             horario = new Horario(hs_inicio, hs_final, dias);
                             actividad.getHorarios().add(horario);
                             if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
-                                Log.v("HORARIOS", (((ArrayList<Horario>) actividad.getHorarios()).get(0)).toString());
+                                Toast.makeText(getApplicationContext(), "Cantidad de actividades: "+String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()), Toast.LENGTH_SHORT).show();
+                                Log.v("HORARIOS", String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()));
                             }
                         }
                         else{
@@ -291,13 +293,20 @@ public class CreateActivity extends AppCompatActivity {
         if (id == R.id.action_save) {
             FirebaseUser usuario = mAuth.getCurrentUser();
             if (usuario != null) {
-                agregarActividad(usuario.getUid());
-                Snackbar snackbar = Snackbar
-                        .make(findViewById(R.id.activity_create),
-                                getString(R.string.success_actividad), Snackbar.LENGTH_LONG);
+                String uid = usuario.getUid();
 
-                snackbar.show();
-                finish();
+                if(getIntent().hasExtra("Actividad_cargada")){
+                    actualizarActividad(uid, actividad);
+                }
+                else {
+                    agregarActividad(uid);
+                    Snackbar snackbar = Snackbar
+                            .make(findViewById(R.id.activity_create),
+                                    getString(R.string.success_actividad), Snackbar.LENGTH_LONG);
+
+                    snackbar.show();
+                    finish();
+                }
             }
             return true;
         }
@@ -308,19 +317,22 @@ public class CreateActivity extends AppCompatActivity {
     private void agregarActividad(String uid) {
         EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
         actividad.setNombre(nombreActividad.getText().toString());
-        if(getIntent().hasExtra("Actividad_cargada")){
-            String idAct = ((Actividad) getIntent().getSerializableExtra("Actividad_cargada")).obtenerId();
-            // TODO: actualizar actividad en la base de datos
-            // Aca trate, sin exito, de actualizar solamente el nombre de la actividad para probar,
-            // pero en realidad necesito cambiar TODA la actividad (hs de inicio, final y arrayList de dias
-            Toast.makeText(getApplicationContext(),
-                    "Modificaste la actividad, pero no se guardo en la base de datos",
-                    Toast.LENGTH_SHORT).show();
-            // mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(["nombre":nombreActividad]);
-        }
-        else {
-            mDatabase.child("users").child(uid).child("actividades").push()
+        mDatabase.child("users").child(uid).child("actividades").push()
                     .setValue(actividad);
-        }
+    }
+
+
+    private void actualizarActividad(String uid, Actividad act){
+        String idAct = ((Actividad) getIntent().getSerializableExtra("Actividad_cargada")).obtenerId();
+        EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
+        actividad.setNombre(nombreActividad.getText().toString());
+
+        Toast.makeText(getApplicationContext(),
+                "Modificaste la actividad, pero no se guardo en la base de datos",
+                Toast.LENGTH_SHORT).show();
+        // TODO: actualizar actividad en la base de datos
+        // Aca trate, sin exito, de actualizar solamente el nombre de la actividad para probar,
+        // pero en realidad necesito cambiar TODA la actividad (hs de inicio, final y arrayList de dias
+        // mDatabase.child("users").child(uid).child("actividades").child(idAct).setValue(["nombre":nombreActividad]);
     }
 }
