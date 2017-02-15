@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:key="example_list"
+        android:title="Alarma"
+        android:defaultValue="5"
+        android:entries="@array/tiempos_titulos"
+        android:entryValues="@array/tiempos_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+    <RingtonePreference
+        android:title="@string/pref_ringtone"
+        android:key="pref_ringtone"
+        android:ringtoneType="notification" />
+</PreferenceScreen>
