@@ -60,14 +60,12 @@ public class ListActivity extends AppCompatActivity {
         ListView lv_lista_actividades = (ListView) findViewById(R.id.lv_lista_actividades);
         lv_lista_actividades.setAdapter(adapter);
 
-        lv_lista_actividades.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        lv_lista_actividades.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getApplicationContext(), "Actividad: "+lista_actividades.get(i).toString(), Toast.LENGTH_SHORT).show();
                 Dialog dialog = createDialog(lista_actividades.get(i));
                 dialog.show();
-
-                return false;
             }
         });
 
