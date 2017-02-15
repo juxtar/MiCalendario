@@ -41,6 +41,7 @@ public class CreateActivity extends AppCompatActivity {
     NumberPicker np_hs_fin;
     NumberPicker np_min_fin;
     HorarioAdapter adapter;
+    EditText nombre_actividad;
 
     CheckBox lunes;
     CheckBox martes;
@@ -211,29 +212,57 @@ public class CreateActivity extends AppCompatActivity {
                         String hs_final;
 
                         cargarDias(dias);
+                        int h_inicio = ((NumberPicker) dialogView.findViewById(R.id.np_hs_inicio)).getValue();
+                        int h_final = ((NumberPicker) dialogView.findViewById(R.id.np_hs_fin)).getValue();
+                        int m_inicio = ((NumberPicker) dialogView.findViewById(R.id.np_min_inicio)).getValue();
+                        int m_final = ((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue();
 
-                        hs_inicio = String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_hs_inicio)).getValue()) +":"+
-                                String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_min_inicio)).getValue());
-                        hs_final = String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_hs_fin)).getValue()) +":"+
-                                String.format("%02d",((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue());
 
-                        //TODO: cuando vengo desde ListActivity y agrego un horario y le mando aceptar, el nuevo horario no se muestra en el listview
-                        if(oldHorario == null) {
-                            horario = new Horario(hs_inicio, hs_final, dias);
-                            actividad.getHorarios().add(horario);
-                            if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
-                                Toast.makeText(getApplicationContext(), "Cantidad de actividades: "+String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()), Toast.LENGTH_SHORT).show();
-                                Log.v("HORARIOS", String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()));
+                        if (verificarHoras(h_inicio, h_final, m_inicio, m_final) && dias.size()>0 ) {
+                            hs_inicio = String.format("%02d", ((NumberPicker) dialogView.findViewById(R.id.np_hs_inicio)).getValue()) + ":" +
+                                    String.format("%02d", ((NumberPicker) dialogView.findViewById(R.id.np_min_inicio)).getValue());
+                            hs_final = String.format("%02d", ((NumberPicker) dialogView.findViewById(R.id.np_hs_fin)).getValue()) + ":" +
+                                    String.format("%02d", ((NumberPicker) dialogView.findViewById(R.id.np_min_fin)).getValue());
+
+
+                            if (oldHorario == null) {
+                                horario = new Horario(hs_inicio, hs_final, dias);
+                                if (verificarSuperpuesta(horario,actividad.getHorarios())){
+                                    actividad.getHorarios().add(horario);
+                                    if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
+                                        Toast.makeText(getApplicationContext(), "Cantidad de actividades: " + String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()), Toast.LENGTH_SHORT).show();
+                                        Log.v("HORARIOS", String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()));
+                                    }
+                                }
+                                else{
+                                    Toast.makeText(getApplicationContext(),"Las actividades no pueden superponerse.", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                if(verificarSuperpuesta(new Horario(hs_inicio,hs_final,dias), actividad.getHorarios())) {
+                                    oldHorario.setDias(dias);
+                                    oldHorario.setHs_inicio(hs_inicio);
+                                    oldHorario.setHs_fin(hs_final);
+                                }
+                                else{
+                                    Toast.makeText(getApplicationContext(),"Las actividades no pueden superponerse.", Toast.LENGTH_SHORT).show();
+                                }
                             }
+
+                            adapter.notifyDataSetChanged();
+                            dialog.dismiss();
                         }
                         else{
-                            oldHorario.setDias(dias);
-                            oldHorario.setHs_inicio(hs_inicio);
-                            oldHorario.setHs_fin(hs_final);
+                            String error = "";
+                            if (!(dias.size()>0)) {
+                                error += "Debe ingresar por lo menos un día para la actividad.\n";
+                            }
+                            if (!(verificarHoras(h_inicio,h_final,m_inicio,m_final))){
+                                    error += "La hora ingresada es incorrecta, asegurese que la hora de inicio sea distinta y menor que la de final. \n";
+                            }
+                            Toast.makeText(getApplicationContext(),
+                                    error,
+                                    Toast.LENGTH_SHORT).show();
                         }
-
-                        adapter.notifyDataSetChanged();
-                        dialog.dismiss();
                     }
                 })
                 .setNegativeButton(R.string.cancelar, new DialogInterface.OnClickListener() {
@@ -242,6 +271,78 @@ public class CreateActivity extends AppCompatActivity {
                     }
                 });
         return builder.create();
+    }
+
+    private boolean verificarSuperpuesta(Horario horario, ArrayList<Horario> horarios) {
+        boolean result;
+        if(horarios.size()== 0){
+            result = true;
+        }
+        else{
+            result = false;
+        }
+        int horario_inicio_hora = Integer.parseInt(horario.getHs_inicio().substring(0,2));
+        int horario_inicio_min = Integer.parseInt(horario.getHs_inicio().substring(3));
+        int horario_fin_hora = Integer.parseInt(horario.getHs_fin().substring(0,2));
+        int horario_fin_min = Integer.parseInt(horario.getHs_fin().substring(3));
+        for (Horario h : horarios) {
+            int h_inicio_hora = Integer.parseInt(h.getHs_inicio().substring(0,2));
+            int h_inicio_min = Integer.parseInt(h.getHs_inicio().substring(3));
+            int h_fin_hora = Integer.parseInt(h.getHs_fin().substring(0,2));
+            int h_fin_min = Integer.parseInt(h.getHs_fin().substring(3));
+            for (int x : horario.getDias()) {
+                for (int y : h.getDias()) {
+                    if (x == y) {
+                        if ((horario_inicio_hora < h_inicio_hora)) {
+                            if (horario_fin_hora < h_inicio_hora) {
+                                result = true;
+                            }
+                            else{
+                                if((horario_fin_hora == h_inicio_hora) && (horario_fin_min < h_inicio_min)){
+                                    result = true;
+                                }
+
+                            }
+                        }
+                        else {
+                            if (horario_inicio_hora == h_inicio_hora) {
+                                if (horario_fin_min < h_inicio_min){
+                                    result = true;
+                                }
+                            }
+                            else{
+                                if (horario_inicio_hora > h_fin_hora){
+                                    result = true;
+                                }
+                                else{
+                                    if(horario_inicio_hora == h_fin_hora){
+                                        if(horario_inicio_min > h_fin_min){
+                                            result = true;
+                                        }
+                                    }
+
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+
+    private boolean verificarHoras(int h_inicio, int h_final, int m_inicio, int m_final) {
+        if (h_inicio<h_final){
+            return true;
+        }
+        else{
+            if(h_inicio == h_final && m_inicio < m_final){
+                return true;
+            }
+        }
+        return false;
     }
 
     private class DoubleDigitFormatter implements NumberPicker.Formatter{
@@ -280,24 +381,35 @@ public class CreateActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_save) {
             FirebaseUser usuario = mAuth.getCurrentUser();
             if (usuario != null) {
                 String uid = usuario.getUid();
+                nombre_actividad = (EditText) findViewById(R.id.et_nombre);
+                String nombre = nombre_actividad.getText().toString();
 
-                if(getIntent().hasExtra("Actividad_cargada")){
-                    actualizarActividad(uid, actividad);
+                if(nombre.matches("")){
+                    Toast.makeText(getApplicationContext(),"Ingrese un nombre para la Actividad",
+                            Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    agregarActividad(uid);
-                    Snackbar snackbar = Snackbar
-                            .make(findViewById(R.id.activity_create),
-                                    getString(R.string.success_actividad), Snackbar.LENGTH_LONG);
+                    if (actividad.getHorarios().size() > 0) {
+                        if (getIntent().hasExtra("Actividad_cargada")) {
+                            actualizarActividad(uid, actividad);
+                        } else {
+                            agregarActividad(uid);
+                            Snackbar snackbar = Snackbar
+                                    .make(findViewById(R.id.activity_create),
+                                            getString(R.string.success_actividad), Snackbar.LENGTH_LONG);
 
-                    snackbar.show();
-                    finish();
+                            snackbar.show();
+                            finish();
+                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Ingrese al menos un horario para la Actividad",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
             return true;
@@ -307,8 +419,8 @@ public class CreateActivity extends AppCompatActivity {
     }
 
     private void agregarActividad(String uid) {
-        EditText nombreActividad = (EditText) findViewById(R.id.et_nombre);
-        actividad.setNombre(nombreActividad.getText().toString());
+        nombre_actividad = (EditText) findViewById(R.id.et_nombre);
+        actividad.setNombre(nombre_actividad.getText().toString());
         mDatabase.child("users").child(uid).child("actividades").push()
                     .setValue(actividad);
     }
