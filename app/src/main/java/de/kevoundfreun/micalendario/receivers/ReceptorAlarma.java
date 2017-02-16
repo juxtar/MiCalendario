@@ -7,7 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -62,10 +65,15 @@ public class ReceptorAlarma extends BroadcastReceiver {
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle(actividad.getNombre())
-                .setContentText("La actividad comenzará a las "+horario.get(Calendar.HOUR)+":"+horario.get(Calendar.MINUTE))
+                .setContentText("La actividad comenzará a las "+horario.get(Calendar.HOUR_OF_DAY)+":"+horario.get(Calendar.MINUTE))
                 .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
                 .setContentIntent(notificationPIntent)
                 .setAutoCancel(true);
+
+        SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(context);
+        String strRingtonePreference = preferencias.getString("pref_ringtone", "DEFAULT_SOUND");
+        notificationBuilder.setSound(Uri.parse(strRingtonePreference));
+
         NotificationManager manager = (NotificationManager) context.getSystemService(Context
                 .NOTIFICATION_SERVICE);
 
