@@ -1,13 +1,16 @@
 package de.kevoundfreun.micalendario.clases;
 
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.widget.ArrayAdapter;
 
 import com.alamkanak.weekview.WeekViewEvent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -112,5 +115,27 @@ public class Actividad implements Serializable{
     @Override
     public String toString() {
         return nombre;
+    }
+
+    public Calendar calcularProximoHorario() {
+        long now = Calendar.getInstance().getTimeInMillis();
+        long milisProximoHorario = 0;
+        for (Horario h : horarios) {
+            List<WeekViewEvent> eventos = h.toWeekViewEvents();
+            int i = 1;
+            long milisProximoWeekViewEvent = eventos.get(0).getStartTime().getTimeInMillis() - now;
+            while (milisProximoWeekViewEvent < (1000 * 24 * 3600 * 7) && (i < eventos.size())) {
+                WeekViewEvent e = eventos.get(i);
+                milisProximoWeekViewEvent = e.getStartTime().getTimeInMillis() - now;
+                i++;
+                if ((milisProximoHorario == 0) && (milisProximoWeekViewEvent > 0) )
+                    milisProximoHorario = milisProximoWeekViewEvent;
+                if ((milisProximoWeekViewEvent < milisProximoHorario) && (milisProximoWeekViewEvent > 0))
+                    milisProximoHorario = milisProximoWeekViewEvent;
+            }
+        }
+        Calendar proximoHorario = Calendar.getInstance();
+        proximoHorario.setTimeInMillis(milisProximoHorario);
+        return proximoHorario;
     }
 }
