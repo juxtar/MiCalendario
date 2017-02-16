@@ -32,6 +32,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -40,6 +43,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import de.kevoundfreun.micalendario.clases.Actividad;
+import de.kevoundfreun.micalendario.clases.MyBundle;
 import de.kevoundfreun.micalendario.receivers.ReceptorAlarma;
 
 public class MainActivity extends AppCompatActivity implements WeekView.EventLongPressListener, WeekView.EventClickListener, MonthLoader.MonthChangeListener {
@@ -250,20 +254,42 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
         Intent alarmaIntent = new Intent(this, ReceptorAlarma.class);
         HashMap<String, Object> proxActividad = calcularProximaActividad(actividades);
-        alarmaIntent.putExtra("proxActividad", proxActividad);
+        Actividad act = (Actividad)proxActividad.get("actividad");
+        Log.d("Alarma", act.getNombre());
+        MyBundle bundle = new MyBundle((Actividad)proxActividad.get("actividad"), (Calendar)proxActividad.get("horario"));
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(bos);
+            out.writeObject(bundle);
+            out.flush();
+            byte[] data = bos.toByteArray();
+            alarmaIntent.putExtra("bundle", data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bos.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 
         PendingIntent pi = PendingIntent.getBroadcast(this.getApplicationContext(), 1,
                 alarmaIntent, 0);
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = (Calendar)proxActividad.get("horario");
         long quinceminutos = 900000;
-        cal.setTimeInMillis(cal.getTimeInMillis() + quinceminutos);
+        cal.setTimeInMillis(cal.getTimeInMillis() - quinceminutos);
         cal.getTimeInMillis(); // Work-around lazy updating
-        am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
+        Log.d("Alarma", "Va a sonar a las: "+cal.getTimeInMillis());
+        am.set(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(), pi);
     }
 
     static public HashMap<String, Object> calcularProximaActividad(List<Actividad> actividades) {
         HashMap<String, Object> result = new HashMap<>();
         // Inicializo con proximo evento de la primera actividad
+        if (actividades.isEmpty())
+            return null;
         long milisProximaActividad = actividades.get(0).calcularProximoHorario().getTimeInMillis();
         result.put("actividad", actividades.get(0));
         for (Actividad a : actividades) {
@@ -273,8 +299,9 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 result.put("actividad", a);
             }
         }
+        long now = Calendar.getInstance().getTimeInMillis();
         Calendar proximoHorario = Calendar.getInstance();
-        proximoHorario.setTimeInMillis(milisProximaActividad);
+        proximoHorario.setTimeInMillis(milisProximaActividad + now);
         result.put("horario", proximoHorario);
         return result;
     }

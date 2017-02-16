@@ -9,7 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +22,7 @@ import java.util.List;
 import de.kevoundfreun.micalendario.MainActivity;
 import de.kevoundfreun.micalendario.R;
 import de.kevoundfreun.micalendario.clases.Actividad;
+import de.kevoundfreun.micalendario.clases.MyBundle;
 
 /**
  * Created by Juxtar on 15/02/2017.
@@ -27,9 +33,29 @@ public class ReceptorAlarma extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        HashMap<String, Object> proxActividad = (HashMap<String, Object>) intent.getSerializableExtra("proxActividad");
-        Actividad actividad = (Actividad) proxActividad.get("actividad");
-        Calendar horario = (Calendar)proxActividad.get("horario");
+
+        ByteArrayInputStream bis = new ByteArrayInputStream(intent.getByteArrayExtra("bundle"));
+        ObjectInput in = null;
+        MyBundle myBundle = null;
+        try {
+            in = new ObjectInputStream(bis);
+            myBundle = (MyBundle) in.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        Actividad actividad = myBundle.getActividad();
+        Calendar horario = myBundle.getHorario();
+        Log.d("ReceptorAlarma", actividad.getNombre());
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent notificationPIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
