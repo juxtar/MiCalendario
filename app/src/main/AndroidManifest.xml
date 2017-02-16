@@ -48,6 +48,8 @@
                 <action android:name="de.kevoundfreun.micalendario.receivers.MainActivity.ReceptorAlarma" />
             </intent-filter>
         </receiver>
+        <service android:name=".servicios.ProgramarAlarmaService"
+            android:exported="false" />
     </application>
 
 </manifest>

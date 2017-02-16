@@ -1,18 +1,10 @@
 package de.kevoundfreun.micalendario;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.app.usage.UsageEvents;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -34,19 +26,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
 import de.kevoundfreun.micalendario.clases.Actividad;
-import de.kevoundfreun.micalendario.clases.MyBundle;
-import de.kevoundfreun.micalendario.receivers.ReceptorAlarma;
+import de.kevoundfreun.micalendario.servicios.ProgramarAlarmaService;
 
 public class MainActivity extends AppCompatActivity implements WeekView.EventLongPressListener, WeekView.EventClickListener, MonthLoader.MonthChangeListener {
     private FirebaseAuth mAuth;
@@ -57,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     ArrayList<Actividad> actividades;
     ArrayList<WeekViewEvent> weekViewEvents;
     FirebaseUser usuario;
-    ReceptorAlarma receptor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +59,6 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 startActivity(intent);
             }
         });
-
-        // Setear Receptor de Alarma
-        receptor = new ReceptorAlarma();
 
         //Auth
         mAuth = FirebaseAuth.getInstance();
@@ -155,9 +137,8 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mWeekView.notifyDatasetChanged();
-                    receptor.setActividades(actividades);
-                    if(actividades.size()!= 0)
-                        programarProximaAlarma();
+                    if(!actividades.isEmpty())
+                        iniciarServicioAlarmas();
                 }
 
                 @Override
@@ -250,49 +231,10 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         builder.create().show();
     }
 
-    private void programarProximaAlarma() {
-        AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        final String ALARMA = "de.kevoundfreun.micalendario.MainActivity.ReceptorAlarma";
-        IntentFilter intentFilter = new IntentFilter(ALARMA);
-        ReceptorAlarma receptor = new ReceptorAlarma();
-        registerReceiver(receptor, intentFilter);
-
-        Intent alarmaIntent = new Intent(this, ReceptorAlarma.class);
-        HashMap<String, Object> proxActividad = calcularProximaActividad(actividades);
-        Actividad act = (Actividad)proxActividad.get("actividad");
-        Log.d("Alarma", act.getNombre());
-        MyBundle bundle = new MyBundle((Actividad)proxActividad.get("actividad"), (Calendar)proxActividad.get("horario"));
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream out;
-        try {
-            out = new ObjectOutputStream(bos);
-            out.writeObject(bundle);
-            out.flush();
-            byte[] data = bos.toByteArray();
-            alarmaIntent.putExtra("bundle", data);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                bos.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        PendingIntent pi = PendingIntent.getBroadcast(this.getApplicationContext(), 1,
-                alarmaIntent, 0);
-        Calendar cal = (Calendar)proxActividad.get("horario");
-        SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String strTiempoPreference = preferencias.getString("pref_tiempos", "5");
-        long tiempoPreference = Long.parseLong(strTiempoPreference);
-        long minutosAntesAAvisar = tiempoPreference * 60000;
-        cal.setTimeInMillis(cal.getTimeInMillis() - minutosAntesAAvisar);
-        cal.getTimeInMillis(); // Work-around lazy updating
-        Log.d("Alarma", "Avisar previos: "+tiempoPreference);
-        Log.d("Alarma", "Va a sonar a las: "+cal.getTimeInMillis());
-        am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
+    private void iniciarServicioAlarmas() {
+        Intent i = new Intent(this, ProgramarAlarmaService.class);
+        i.putExtra("Actividades", actividades);
+        startService(i);
     }
 
     static public HashMap<String, Object> calcularProximaActividad(List<Actividad> actividades) {

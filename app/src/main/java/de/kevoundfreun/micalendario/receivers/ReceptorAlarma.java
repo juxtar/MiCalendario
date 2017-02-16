@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.SharedElementCallback;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -32,8 +33,6 @@ import de.kevoundfreun.micalendario.clases.MyBundle;
  */
 
 public class ReceptorAlarma extends BroadcastReceiver {
-    private List<Actividad> actividades;
-
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -78,9 +77,12 @@ public class ReceptorAlarma extends BroadcastReceiver {
                 .NOTIFICATION_SERVICE);
 
         manager.notify(1, notificationBuilder.build());
+        _listener.onActividadNotificada();
     }
 
-    public void setActividades(List<Actividad> actividades) {
-        this.actividades = actividades;
+    static OnActividadNotificadaListener _listener;
+
+    public static void setOnActividadNotificadaListener(OnActividadNotificadaListener listener) {
+        _listener = listener;
     }
 }
