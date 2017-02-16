@@ -151,7 +151,8 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     mWeekView.notifyDatasetChanged();
                     receptor.setActividades(actividades);
-                    programarProximaAlarma();
+                    if(actividades.size()!= 0)
+                        programarProximaAlarma();
                 }
 
                 @Override
@@ -282,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         cal.setTimeInMillis(cal.getTimeInMillis() - quinceminutos);
         cal.getTimeInMillis(); // Work-around lazy updating
         Log.d("Alarma", "Va a sonar a las: "+cal.getTimeInMillis());
-        am.set(AlarmManager.RTC_WAKEUP, Calendar.getInstance().getTimeInMillis(), pi);
+        am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
     }
 
     static public HashMap<String, Object> calcularProximaActividad(List<Actividad> actividades) {
