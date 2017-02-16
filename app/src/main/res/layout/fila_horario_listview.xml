@@ -6,7 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:descendantFocusability="blocksDescendants">
+
+    android:descendantFocusability="blocksDescendants"
+    >
 
     <LinearLayout
         android:orientation="vertical"
@@ -37,13 +39,20 @@
             android:id="@+id/textView_horario"
             android:layout_marginTop="3dp"/>
     </LinearLayout>
-
+    <ImageButton
+        android:layout_width="56dp"
+        android:layout_height="60dp"
+        app:srcCompat="@drawable/ic_mode_edit_black_24dp"
+        android:id="@+id/horarioBtnModificar"
+        android:backgroundTint="@android:color/transparent"
+        android:layout_weight="0.34" />
+    <!--srcCompat="@android:drawable/ic_menu_delete"-->
+    />
     <ImageButton
         android:layout_width="56dp"
         android:layout_height="60dp"
         app:srcCompat="@drawable/ic_delete_black_24dp"
         android:id="@+id/horarioBtnEliminar"
-        style="@android:style/Widget.Material.Light.ImageButton"
         android:backgroundTint="@android:color/transparent"
         android:layout_weight="0.34" />
     <!--srcCompat="@android:drawable/ic_menu_delete"-->

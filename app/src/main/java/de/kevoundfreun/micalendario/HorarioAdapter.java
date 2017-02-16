@@ -27,7 +27,7 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
         // Get the data item for this position
         final Horario horario = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
@@ -37,7 +37,17 @@ public class HorarioAdapter extends ArrayAdapter<Horario> {
         // Lookup view for data population
         TextView tvDias = (TextView) convertView.findViewById(R.id.textView_listaDias);
         TextView tvHorario = (TextView) convertView.findViewById(R.id.textView_horario);
+        ImageButton btnEliminarHorario = (ImageButton) convertView.findViewById(R.id.horarioBtnEliminar);
 
+        final View finalConvertView = convertView;
+        btnEliminarHorario.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: ver como acceder a la lista de horarios y borrar el que corresponde a este btnEliminar
+
+                Toast.makeText(getContext(), "ELIMINAR horario", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Populate the data into the template view using the data object
 

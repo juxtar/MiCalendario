@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 import de.kevoundfreun.micalendario.clases.Actividad;
+import de.kevoundfreun.micalendario.clases.Horario;
 
 public class ListActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
@@ -66,6 +67,7 @@ public class ListActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Actividad: "+lista_actividades.get(i).toString(), Toast.LENGTH_SHORT).show();
                 Dialog dialog = createDialog(lista_actividades.get(i));
                 dialog.show();
+                adapter.notifyDataSetChanged();
             }
         });
 
@@ -76,6 +78,7 @@ public class ListActivity extends AppCompatActivity {
                 // por ahora hay que volver al calendario y volver a entrar para que la lista se actualice
                 Intent intent_crear_actividad = new Intent(ListActivity.this, CreateActivity.class);
                 startActivity(intent_crear_actividad);
+                finish();
             }
         });
 
@@ -89,10 +92,17 @@ public class ListActivity extends AppCompatActivity {
         // Inflate and set the layout for the dialog
         // Pass null as the parent view because its going in the dialog layout
         dialogView = inflater.inflate(R.layout.dialog_modificar_borrar, null, false);
+        String horarios = "";
+        for(Horario h : act.getHorarios()){
+            horarios+="\n              "+h.diasTexto()+"  de  "+h.getHs_inicio()+"  a  "+h.getHs_fin();
+        }
         builder.setView(dialogView)
                 // Add action buttons
-                .setTitle("Actividad")
-                .setMessage("¿Qué desea hacer con la actividad "+act.toString()+"?")
+
+                .setTitle("Nombre: "+act.toString())
+                .setMessage("¿Qué desea hacer con la actividad?"+
+                        "\n\nDetalles:"+
+                        horarios)
                 .setPositiveButton(R.string.modificar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
@@ -131,7 +141,10 @@ public class ListActivity extends AppCompatActivity {
         }
         adapter.notifyDataSetChanged();
     }
-
+    public void onResume(){
+        super.onResume();
+        adapter.notifyDataSetChanged();
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

@@ -113,4 +113,34 @@ public class Horario implements Serializable{
         }
         return listaEventos;
     }
+
+    public String diasTexto() {
+        String dias = "";
+        for(Integer dia : getDias()){
+            switch (dia){
+                case 0:
+                    dias+=" Do.";
+                    break;
+                case 1:
+                    dias+="Lu.";
+                    break;
+                case 2:
+                    dias+=" Ma.";
+                    break;
+                case 3:
+                    dias+=" Mi.";
+                    break;
+                case 4:
+                    dias+=" Ju.";
+                    break;
+                case 5:
+                    dias+=" Vi.";
+                    break;
+                case 6:
+                    dias+=" Sa.";
+                    break;
+            }
+        }
+        return dias;
+    }
 }

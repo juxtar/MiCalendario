@@ -98,21 +98,19 @@ public class CreateActivity extends AppCompatActivity {
             }
         });
 
-        listaHorarios.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                Dialog dialog = createDialog(actividad.getHorarios().get(i));
-                cargarDialog();
-                cargarDefaultsDialog(actividad.getHorarios().get(i));
-                dialog.show();
-                return false;
-            }
-        });
-
         listaHorarios.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, final int i, long l) {
+                ImageButton btnModificarHorario = (ImageButton) view.findViewById(R.id.horarioBtnModificar);
+                btnModificarHorario.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Dialog dialog = createDialog(actividad.getHorarios().get(i));
+                        cargarDialog();
+                        cargarDefaultsDialog(actividad.getHorarios().get(i));
+                        dialog.show();
+                    }
+                });
                 ImageButton btnEleminarHorario = (ImageButton) view.findViewById(R.id.horarioBtnEliminar);
                 btnEleminarHorario.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -125,9 +123,6 @@ public class CreateActivity extends AppCompatActivity {
                 });
             }
         });
-        /*ImageButton btnEliminarHorario = (ImageButton) convertView.findViewById(R.id.horarioBtnEliminar);
-
-        */
 
     }
 
