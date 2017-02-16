@@ -6,9 +6,11 @@ import android.app.usage.UsageEvents;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -80,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         mAuth = FirebaseAuth.getInstance();
         usuario = mAuth.getCurrentUser();
 
+        // Habilitar Modo Offline
+        if (mDatabase == null)
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         //Acceso Database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -279,9 +284,13 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         PendingIntent pi = PendingIntent.getBroadcast(this.getApplicationContext(), 1,
                 alarmaIntent, 0);
         Calendar cal = (Calendar)proxActividad.get("horario");
-        long quinceminutos = 900000;
-        cal.setTimeInMillis(cal.getTimeInMillis() - quinceminutos);
+        SharedPreferences preferencias = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String strTiempoPreference = preferencias.getString("pref_tiempos", "5");
+        long tiempoPreference = Long.parseLong(strTiempoPreference);
+        long minutosAntesAAvisar = tiempoPreference * 60000;
+        cal.setTimeInMillis(cal.getTimeInMillis() - minutosAntesAAvisar);
         cal.getTimeInMillis(); // Work-around lazy updating
+        Log.d("Alarma", "Avisar previos: "+tiempoPreference);
         Log.d("Alarma", "Va a sonar a las: "+cal.getTimeInMillis());
         am.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pi);
     }

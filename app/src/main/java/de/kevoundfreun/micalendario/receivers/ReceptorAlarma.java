@@ -66,7 +66,7 @@ public class ReceptorAlarma extends BroadcastReceiver {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setContentTitle(actividad.getNombre())
                 .setContentText("La actividad comenzará a las "+horario.get(Calendar.HOUR_OF_DAY)+":"+horario.get(Calendar.MINUTE))
-                .setSmallIcon(R.drawable.ic_notifications_active_black_24dp)
+                .setSmallIcon(R.drawable.ic_calendar_in_a_circle_interface_symbol)
                 .setContentIntent(notificationPIntent)
                 .setAutoCancel(true);
 
