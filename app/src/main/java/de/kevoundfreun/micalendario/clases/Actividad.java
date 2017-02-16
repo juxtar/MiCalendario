@@ -1,6 +1,7 @@
 package de.kevoundfreun.micalendario.clases;
 
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.widget.ArrayAdapter;
 
 import com.alamkanak.weekview.WeekViewEvent;
@@ -122,13 +123,14 @@ public class Actividad implements Serializable{
         for (Horario h : horarios) {
             List<WeekViewEvent> eventos = h.toWeekViewEvents();
             int i = 1;
-            milisProximoHorario = eventos.get(0).getStartTime().getTimeInMillis() - now;
-            long milisProximoWeekViewEvent = milisProximoHorario;
-            while (milisProximoWeekViewEvent < (1000 * 24 * 3600 * 7)) {
+            long milisProximoWeekViewEvent = eventos.get(0).getStartTime().getTimeInMillis() - now;
+            while (milisProximoWeekViewEvent < (1000 * 24 * 3600 * 7) && (i < eventos.size())) {
                 WeekViewEvent e = eventos.get(i);
                 milisProximoWeekViewEvent = e.getStartTime().getTimeInMillis() - now;
                 i++;
-                if (milisProximoWeekViewEvent < milisProximoHorario)
+                if ((milisProximoHorario == 0) && (milisProximoWeekViewEvent > 0) )
+                    milisProximoHorario = milisProximoWeekViewEvent;
+                if ((milisProximoWeekViewEvent < milisProximoHorario) && (milisProximoWeekViewEvent > 0))
                     milisProximoHorario = milisProximoWeekViewEvent;
             }
         }
