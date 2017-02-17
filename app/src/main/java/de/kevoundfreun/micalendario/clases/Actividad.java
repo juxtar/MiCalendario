@@ -138,4 +138,19 @@ public class Actividad implements Serializable{
         proximoHorario.setTimeInMillis(milisProximoHorario);
         return proximoHorario;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Actividad)) return false;
+
+        Actividad actividad = (Actividad) o;
+
+        if (obtenerId() != null ? !obtenerId().equals(actividad.obtenerId()) : actividad.obtenerId() != null)
+            return false;
+        if (getNombre() != null ? !getNombre().equals(actividad.getNombre()) : actividad.getNombre() != null)
+            return false;
+        return getColor() == actividad.getColor();
+
+    }
 }
