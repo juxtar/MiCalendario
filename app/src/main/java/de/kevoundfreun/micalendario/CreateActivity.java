@@ -118,7 +118,6 @@ public class CreateActivity extends AppCompatActivity {
                         //TODO: ver como acceder a la lista de horarios y borrar el que corresponde a este btnEliminar
                         actividad.getHorarios().remove(i);
                         adapter.notifyDataSetChanged();
-                        Toast.makeText(getApplicationContext(), "ELIMINAR horario", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -246,7 +245,7 @@ public class CreateActivity extends AppCompatActivity {
                                 if (verificarSuperpuesta(horario,actividad.getHorarios())){
                                     actividad.getHorarios().add(horario);
                                     if (((ArrayList<Horario>) actividad.getHorarios()).size() > 0) {
-                                        Toast.makeText(getApplicationContext(), "Cantidad de actividades: " + String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()), Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(getApplicationContext(), "Cantidad de actividades: " + String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()), Toast.LENGTH_SHORT).show();
                                         Log.v("HORARIOS", String.valueOf(((ArrayList<Horario>) actividad.getHorarios()).size()));
                                     }
                                 }

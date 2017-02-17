@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -65,8 +66,10 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
         usuario = mAuth.getCurrentUser();
 
         // Habilitar Modo Offline
-        if (mDatabase == null)
+        if (FirebaseApp.getApps(getApplicationContext()).isEmpty()) {
+            FirebaseApp.initializeApp(getApplicationContext());
             FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        }
         //Acceso Database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -93,60 +96,7 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
 
     public void onResume(){
         super.onResume();
-        weekViewEvents = new ArrayList<>();
-        actividades = new ArrayList<>();
-        if(usuario != null){
-            Query query = mDatabase.child("users").child(usuario.getUid()).child("actividades");
-            query.orderByKey().addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Actividad actividad = Actividad.fromHashMap((HashMap<String, Object>) dataSnapshot.getValue());
-                    actividad.agregarId(dataSnapshot.getKey());
-
-                    ArrayList<WeekViewEvent> activityEvents = actividad.toWeekViewEvents();
-                    for (WeekViewEvent e : activityEvents) {
-                        e.setName(actividad.getNombre());
-                        e.setColor(actividad.getColor());
-                    }
-
-                    weekViewEvents.addAll(activityEvents);
-                    actividades.add(actividad);
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    mWeekView.notifyDatasetChanged();
-                    if(!actividades.isEmpty())
-                        iniciarServicioAlarmas();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
+        fetchActividades();
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -234,7 +184,65 @@ public class MainActivity extends AppCompatActivity implements WeekView.EventLon
     private void iniciarServicioAlarmas() {
         Intent i = new Intent(this, ProgramarAlarmaService.class);
         i.putExtra("Actividades", actividades);
+        i.putExtra("TiempoActual", Calendar.getInstance().getTimeInMillis() + 100);
         startService(i);
+    }
+
+    private void fetchActividades() {
+        weekViewEvents = new ArrayList<>();
+        actividades = new ArrayList<>();
+        if(usuario != null){
+            Query query = mDatabase.child("users").child(usuario.getUid()).child("actividades");
+            query.orderByKey().addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Actividad actividad = Actividad.fromHashMap((HashMap<String, Object>) dataSnapshot.getValue());
+                    actividad.agregarId(dataSnapshot.getKey());
+
+                    ArrayList<WeekViewEvent> activityEvents = actividad.toWeekViewEvents();
+                    for (WeekViewEvent e : activityEvents) {
+                        e.setName(actividad.getNombre());
+                        e.setColor(actividad.getColor());
+                    }
+
+                    weekViewEvents.addAll(activityEvents);
+                    actividades.add(actividad);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    mWeekView.notifyDatasetChanged();
+                    if(!actividades.isEmpty())
+                        iniciarServicioAlarmas();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     static public HashMap<String, Object> calcularProximaActividad(List<Actividad> actividades) {

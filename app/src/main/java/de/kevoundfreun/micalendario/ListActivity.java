@@ -64,7 +64,6 @@ public class ListActivity extends AppCompatActivity {
         lv_lista_actividades.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getApplicationContext(), "Actividad: "+lista_actividades.get(i).toString(), Toast.LENGTH_SHORT).show();
                 Dialog dialog = createDialog(lista_actividades.get(i));
                 dialog.show();
                 adapter.notifyDataSetChanged();
@@ -106,7 +105,6 @@ public class ListActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.modificar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        Toast.makeText(getApplicationContext(), "MODIFICAR Actividad", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(ListActivity.this, CreateActivity.class);
                         intent.putExtra("Actividad_cargada",act);
                         startActivity(intent);
@@ -123,7 +121,6 @@ public class ListActivity extends AppCompatActivity {
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         String uid = firebaseUser.getUid();
 
-                        Toast.makeText(getApplicationContext(), "ELIMINAR Actividad", Toast.LENGTH_SHORT).show();
                         //TODO: actualizar la lista de actividades -> ahora hay que reiniciar la app para que cambios tengan efecto
                         eliminarActividad(uid,idAct);
                         dialog.dismiss();
